@@ -25,7 +25,7 @@ body {
 
 .equals{
   background-color: blue;
-  grid-column: span 2;
+  /* grid-column: span 2; */
 }
 
 .calculator-grid > button:hover {

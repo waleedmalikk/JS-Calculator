@@ -41,15 +41,24 @@ class Calculator {
           }
       }
       for (let i=0; i<indices.length;i++){
-          if(this.checkStrIncludes(s[indices[i]-1],numbers_string) && this.checkStrIncludes(s[indices[i]+1],numbers_string)){
-          }else{
-              s = s.split('')
+          if(!this.checkStrIncludes(s[indices[i]-1],numbers_string) && !this.checkStrIncludes(s[indices[i]+1],numbers_string)){
+            s = s.split('')
               s[indices[i]] = '0'
               s = s.join('')
           }
       }
       return s.toString()
   }
+
+  clear() {
+    this.currentOperand = ''
+    this.previousOperand = ''
+    this.operation = undefined
+  }
+
+  delete() {
+    this.currentOperand=this.currentOperand.toString().slice(0,-1)
+  } 
   
     append(addition) {
       let lastCharacter= this.getStrLastElement(this.currentOperand)
@@ -62,29 +71,61 @@ class Calculator {
       }else{
         this.currentOperand = this.currentOperand.toString() + addition.toString()
       }  
+    } 
+
+    braketRemoval(s){
+      let arr=[]
+      for (let i= 0;i<s.length;i++){
+        if(s[i]==='('){
+          arr.push(i)
+        }else if(s[i]===')'){
+          arr.splice(arr.length-1,1)
+        }
+      }
+
+      for (let i = 0; i < arr.length; i++) {
+        s= s.slice(0,arr[i]) + s.slice(arr[i]+1)
+      }
+      return s
+
     }
-    
-    clear() {
-      this.currentOperand = ''
-      this.previousOperand = ''
-      this.operation = undefined
-    }
-  
-    delete() {
-      this.currentOperand=this.currentOperand.toString().slice(0,-1)
-    }  
 
     answer(){
-      let lastCharacter= this.getStrLastElement(this.currentOperand)
-      if(this.checkStrIncludes(lastCharacter,operations_string) ){
-        this.currentOperand=this.currentOperand.toString().slice(0,-1)
-      }
       let current_query=this.currentOperand.toString()
       current_query=this.insertBeforeAfter(current_query)
-      this.previousOperand= eval(current_query.replaceAll('÷','/'))
+      let lastCharacter= this.getStrLastElement(current_query)
+      if(this.checkStrIncludes(lastCharacter,operations_string) ){
+        current_query=current_query.slice(0,-1)
+      }
+      current_query=current_query.replaceAll('÷','/')
+
+      for(let i=0;i<current_query.length;i++){
+        if(current_query[i]=="%"){
+          if(i!=current_query.length-1 && !this.checkStrIncludes(current_query[i+1],operations_string)){
+            current_query= current_query.slice(0,i)+'/100*'+current_query.slice(i+1)
+          }else{
+            current_query= current_query.slice(0,i)+'/100'+current_query.slice(i+1)
+          }
+        }
+      }
+      current_query=this.braketRemoval(current_query)
+        if(current_query.length==1 && this.checkStrIncludes(current_query,operations_string)){
+          current_query=""
+         }
+        console.log("current_query:",current_query)
+       try{
+        let ans= eval(current_query)  
+        this.previousOperand=ans    
+
+       }catch(error){
+        this.previousOperand="ERROR"
+       }
     }
 
     sign(){
+      if(this.currentOperand===''){
+        return
+      }
       let lastCharacter= this.getStrLastElement(this.currentOperand)
 
       if(this.checkStrIncludes(lastCharacter,operations_string) ){
@@ -109,8 +150,10 @@ class Calculator {
       this.previousOperandTextElement.innerText= this.previousOperand
     }
 
-  }
-  
+}
+
+const previousOperandTextElement = document.querySelector('[data-previous-operand]')
+const currentOperandTextElement = document.querySelector('[data-current-operand]')
 const numberButtons = document.querySelectorAll('[data-number]')
 const operationButtons = document.querySelectorAll('[data-operation]')
 const percentButton = document.querySelector('[percent-operation]')
@@ -118,8 +161,6 @@ const equalsButton = document.querySelector('[data-equals]')
 const deleteButton = document.querySelector('[data-delete]')
 const allClearButton = document.querySelector('[data-all-clear]')
 const signButton = document.querySelector('[sign]')
-const previousOperandTextElement = document.querySelector('[data-previous-operand]')
-const currentOperandTextElement = document.querySelector('[data-current-operand]')
 const operations_string= ['+','-','*','÷']
 const numbers_string=['0','1','2','3','4','5','6','7','8','9','.']
 
@@ -128,6 +169,7 @@ const calculator = new Calculator(previousOperandTextElement, currentOperandText
 numberButtons.forEach(button => {
   button.addEventListener('click', () => {
     calculator.append(button.innerText)
+    calculator.answer()
     calculator.updateDisplay()
   })
 })
@@ -135,6 +177,7 @@ numberButtons.forEach(button => {
 operationButtons.forEach(button => {
   button.addEventListener('click', () => {
     calculator.append(button.innerText)
+    calculator.answer()
     calculator.updateDisplay()
   })
 })
@@ -151,10 +194,18 @@ allClearButton.addEventListener('click', ()  =>{
 
 deleteButton.addEventListener('click', ()  =>{
   calculator.delete()
+  calculator.answer()
   calculator.updateDisplay()
 })
 
 signButton.addEventListener('click', () =>{
   calculator.sign()
+  calculator.answer()
+  calculator.updateDisplay()
+})
+
+percentButton.addEventListener('click', ()=>{
+  calculator.append(percentButton.innerText)
+  calculator.answer()
   calculator.updateDisplay()
 })
