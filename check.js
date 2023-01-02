@@ -1,4 +1,5 @@
 const operations_string= ['+','-','*','÷','/']
+const numbers_string=['0','1','2','3','4','5','6','7','8','9','.']
 
 function checkStrIncludes(s,arr){
     if(s===undefined){
@@ -22,7 +23,7 @@ function starAdder(s){
 
 
 function backDemimalCheck(s){
-    for(let i=s.length-1;i>=0;i--){
+    for(let i=s.length;i>=0;i--){
         if(checkStrIncludes(s[i],operations_string)){
             console.log('yes')
             return s+"."
@@ -33,9 +34,29 @@ function backDemimalCheck(s){
     }
 }
 
+function zeroRemover(s){
+    let iter=s.length-1
+    while(iter>0){
+        if(s[iter]=='0'){
+            iter--
+        }else{
+            break
+        }
+    }
+    
+    if(iter==0){
+        return ''
+    }
 
-let a = ".5555+324234*32978/3487+(234423)/43533+"
+    if(s[iter]!='.' && !checkStrIncludes(s[iter],numbers_string)){
+        s= s.slice(0,iter+1)
+    }
+    return s
+}
 
-let b = backDemimalCheck(a)
+
+let a = "000"
+
+let b = zeroRemover(a)
 
 console.log(b)
