@@ -50,23 +50,54 @@ class Calculator {
       return s.toString()
   }
 
-  clear() {
-    this.currentOperand = ''
-    this.previousOperand = ''
-    this.operation = undefined
+  
+    backDemimalCheck(s){
+      for(let i=s.length-1;i>=0;i--){
+          if(this.checkStrIncludes(s[i],['.'])){
+              return true
+          }else if(this.checkStrIncludes(s[i],operations_string)){
+              return false
+          }
+      }
   }
 
-  delete() {
-    this.currentOperand=this.currentOperand.toString().slice(0,-1)
-  } 
+    clear() {
+      this.currentOperand = ''
+      this.previousOperand = ''
+      this.operation = undefined
+    }
+
+    delete() {
+      this.currentOperand=this.currentOperand.toString().slice(0,-1)
+    } 
   
     append(addition) {
+
       let lastCharacter= this.getStrLastElement(this.currentOperand)
-      if(!this.checkStrIncludes(addition,operations_string) && lastCharacter ===')' ){
-        this.currentOperand = this.currentOperand.toString() + '*' + addition.toString()
-      }else if(lastCharacter ==='.'  && addition.toString() ==='.' ){
-        return
-      }else if(this.checkStrIncludes(lastCharacter,operations_string) && this.checkStrIncludes(addition,operations_string)){
+
+      if(this.currentOperand.toString()===''){
+        if( this.checkStrIncludes(addition.toString(),operations_string) || addition=="%" ){
+          return
+        }
+      }
+
+      if(addition.toString()==='.'){
+        if(lastCharacter==='.'){
+          return
+        }
+        if(this.backDemimalCheck(this.currentOperand.toString())){
+          return
+        }
+      }
+
+      if(addition.toString()=='%' || addition.toString()=='÷'){
+        if(lastCharacter==='÷' || lastCharacter=='%'){
+          return
+        }
+      }
+
+    
+      if(this.checkStrIncludes(lastCharacter,operations_string) && this.checkStrIncludes(addition,operations_string)){
         this.currentOperand =  this.currentOperand.toString().slice(0,-1)+ addition.toString()
       }else{
         this.currentOperand = this.currentOperand.toString() + addition.toString()
@@ -88,6 +119,17 @@ class Calculator {
       }
       return s
 
+    }
+
+    starAdder(s){
+
+      for(let i=0;i<s.length;i++){
+
+      if(s[i]==')' && !this.checkStrIncludes(s[i+1],operations_string) && i<s.length-1){
+          s=s.slice(0,i+1) + '*'+ s.slice(i+1)
+        }
+      }
+     return s
     }
 
     answer(){
@@ -112,7 +154,10 @@ class Calculator {
         if(current_query.length==1 && this.checkStrIncludes(current_query,operations_string)){
           current_query=""
          }
-        console.log("current_query:",current_query)
+
+         current_query= this.starAdder(current_query)
+
+      // console.log("current_query:",current_query)
        try{
         let ans= eval(current_query)  
         this.previousOperand=ans    
@@ -147,9 +192,14 @@ class Calculator {
 
     updateDisplay() {
       this.currentOperandTextElement.innerText = this.currentOperand
-      this.previousOperandTextElement.innerText= this.previousOperand
+      if(this.currentOperand==''){
+        this.previousOperand=''
+      }else if(this.previousOperand==undefined || this.previousOperand==Infinity){
+        this.previousOperand="ERROR"
+      }
+        this.previousOperandTextElement.innerText= this.previousOperand
+        console.log(this.previousOperand)     
     }
-
 }
 
 const previousOperandTextElement = document.querySelector('[data-previous-operand]')
@@ -161,7 +211,7 @@ const equalsButton = document.querySelector('[data-equals]')
 const deleteButton = document.querySelector('[data-delete]')
 const allClearButton = document.querySelector('[data-all-clear]')
 const signButton = document.querySelector('[sign]')
-const operations_string= ['+','-','*','÷']
+const operations_string= ['+','-','*','÷','/']
 const numbers_string=['0','1','2','3','4','5','6','7','8','9','.']
 
 const calculator = new Calculator(previousOperandTextElement, currentOperandTextElement)
