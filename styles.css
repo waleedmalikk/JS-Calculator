@@ -15,7 +15,7 @@ body {
   min-height: 100vh;
   grid-template-columns: repeat(4, 100px);
   grid-template-rows: minmax(120px, auto) repeat(5, 100px);
-  background-color: rgb(153, 153, 153);
+  background-color: rgb(126, 126, 212);
 }
 
 .calculator-grid > button {
@@ -24,7 +24,7 @@ body {
 }
 
 .equals{
-  background-color: blue;
+  /* background-color: blue; */
   /* grid-column: span 2; */
 }
 
